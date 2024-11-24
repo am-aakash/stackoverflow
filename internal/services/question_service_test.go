@@ -5,9 +5,26 @@ import (
 	"stackoverflow-clone/internal/services"
 	"testing"
 
+	"stackoverflow-clone/ent"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 )
+
+func setupInMemoryDB(t *testing.T) *ent.Client {
+	// Initialize an SQLite in-memory database
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	if err != nil {
+		t.Fatalf("Failed to create in-memory database: %v", err)
+	}
+
+	// Run migrations
+	if err := client.Schema.Create(context.Background()); err != nil {
+		t.Fatalf("Failed to run migrations: %v", err)
+	}
+
+	return client
+}
 
 func TestCreateQuestion(t *testing.T) {
 	client := setupInMemoryDB(t)
